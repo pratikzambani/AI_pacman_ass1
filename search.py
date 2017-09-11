@@ -178,7 +178,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     start_state = problem.getStartState()
     q = util.PriorityQueue()
-    q.push(start_state, -1 + heuristic(start_state, problem))
+    q.push((start_state,0), 0)
 
     explored_list = []
     parent_map = {start_state: (-1, -1)}
@@ -186,19 +186,22 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         if q.isEmpty():
             return []
         node = q.pop()
-        if problem.isGoalState(node):
+        nodeState=node[0]
+        if problem.isGoalState(nodeState):
             actions = []
-            while parent_map[node][1] != -1:
-                actions.append(parent_map[node][1])
-                node = parent_map[node][0]
+            while parent_map[nodeState][1] != -1:
+                actions.append(parent_map[nodeState][1])
+                nodeState = parent_map[nodeState][0]
             ractions = list(reversed(actions))
             return ractions
         explored_list.append(node)
-        """ Check on how to calculate f() = g() + h()"""
-        for s in problem.getSuccessors(node):
+
+        for s in problem.getSuccessors(nodeState):
             if s[0] not in parent_map and s[0] not in explored_list:
-                q.push(s[0], s[2] + heuristic(s[0], problem))
-                parent_map[s[0]] = (node, s[1])
+                    costToNode = node[1] + s[2]
+                    q.push((s[0],costToNode), costToNode + heuristic(s[0], problem))
+                    parent_map[s[0]] = (nodeState, s[1])
+
 
 # Abbreviations
 bfs = breadthFirstSearch
