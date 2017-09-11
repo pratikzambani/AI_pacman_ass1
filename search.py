@@ -86,18 +86,85 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    start_state = problem.getStartState()
+
+    stack = util.Stack()
+    stack.push(start_state)
+
+    explored_list = []
+    parent_map = {start_state: (-1, -1)}
+
+    while 1:
+        if stack.isEmpty():
+            return []
+        node = stack.pop()
+        if problem.isGoalState(node):
+            actions = []
+            while parent_map[node][1] != -1:
+                actions.append(parent_map[node][1])
+                node = parent_map[node][0]
+            ractions = list(reversed(actions))
+            return ractions
+        explored_list.append(node)
+        for s in problem.getSuccessors(node):
+            if s[0] not in parent_map and s[0] not in explored_list:
+                stack.push(s[0])
+                parent_map[s[0]] = (node, s[1])
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    start_state = problem.getStartState()
+    q = util.Queue()
+    q.push(start_state)
+
+    explored_list = []
+    parent_map = {start_state: (-1, -1)}
+
+    while 1:
+        if q.isEmpty():
+            return []
+        node = q.pop()
+        if problem.isGoalState(node):
+            actions = []
+            while parent_map[node][1] != -1:
+                actions.append(parent_map[node][1])
+                node = parent_map[node][0]
+            ractions = list(reversed(actions))
+            return ractions
+        explored_list.append(node)
+        for s in problem.getSuccessors(node):
+            if s[0] not in parent_map and s[0] not in explored_list:
+                q.push(s[0])
+                parent_map[s[0]] = (node, s[1])
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    """ Need to check if update needs to be explicitly called"""
+    start_state = problem.getStartState()
+    q=util.PriorityQueue()
+    q.push(start_state,-1)
+
+    explored_list=[]
+    parent_map = {start_state: (-1, -1)}
+    while 1:
+        if q.isEmpty():
+            return []
+        node = q.pop()
+        if problem.isGoalState(node):
+            actions = []
+            while parent_map[node][1] != -1:
+                actions.append(parent_map[node][1])
+                node = parent_map[node][0]
+            ractions = list(reversed(actions))
+            return ractions
+        explored_list.append(node)
+        for s in problem.getSuccessors(node):
+            if s[0] not in parent_map and s[0] not in explored_list:
+                q.push(s[0],s[2])
+                parent_map[s[0]] = (node, s[1])
 
 def nullHeuristic(state, problem=None):
     """
@@ -108,9 +175,30 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    start_state = problem.getStartState()
+    q = util.PriorityQueue()
+    q.push(start_state, -1 + heuristic(start_state, problem))
+
+    explored_list = []
+    parent_map = {start_state: (-1, -1)}
+    while 1:
+        if q.isEmpty():
+            return []
+        node = q.pop()
+        if problem.isGoalState(node):
+            actions = []
+            while parent_map[node][1] != -1:
+                actions.append(parent_map[node][1])
+                node = parent_map[node][0]
+            ractions = list(reversed(actions))
+            return ractions
+        explored_list.append(node)
+        """ Check on how to calculate f() = g() + h()"""
+        for s in problem.getSuccessors(node):
+            if s[0] not in parent_map and s[0] not in explored_list:
+                q.push(s[0], s[2] + heuristic(s[0], problem))
+                parent_map[s[0]] = (node, s[1])
 
 # Abbreviations
 bfs = breadthFirstSearch
