@@ -88,83 +88,65 @@ def depthFirstSearch(problem):
     """
 
     start_state = problem.getStartState()
-
     stack = util.Stack()
-    stack.push(start_state)
-
     explored_list = []
-    parent_map = {start_state: (-1, -1)}
-
+    stack.push((start_state,[]))
     while 1:
         if stack.isEmpty():
             return []
-        node = stack.pop()
+        node, actionsToNode = stack.pop()
         if problem.isGoalState(node):
-            actions = []
-            while parent_map[node][1] != -1:
-                actions.append(parent_map[node][1])
-                node = parent_map[node][0]
-            ractions = list(reversed(actions))
-            return ractions
+            return actionsToNode
         explored_list.append(node)
         for s in problem.getSuccessors(node):
-            if s[0] not in parent_map and s[0] not in explored_list:
-                stack.push(s[0])
-                parent_map[s[0]] = (node, s[1])
+            if s[0] not in explored_list:
+                action=s[1]
+                stack.push((s[0],actionsToNode + [action]))
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-
     start_state = problem.getStartState()
     q = util.Queue()
-    q.push(start_state)
-
+    q.push((start_state, []))
     explored_list = []
-    parent_map = {start_state: (-1, -1)}
-
     while 1:
         if q.isEmpty():
             return []
-        node = q.pop()
+        node, actionsToNode = q.pop()
         if problem.isGoalState(node):
-            actions = []
-            while parent_map[node][1] != -1:
-                actions.append(parent_map[node][1])
-                node = parent_map[node][0]
-            ractions = list(reversed(actions))
-            return ractions
-        explored_list.append(node)
+            return actionsToNode
+        if node in explored_list:
+            continue
+        else:
+            explored_list.append(node)
         for s in problem.getSuccessors(node):
-            if s[0] not in parent_map and s[0] not in explored_list:
-                q.push(s[0])
-                parent_map[s[0]] = (node, s[1])
+            if s[0] not in explored_list:
+                action = s[1]
+                q.push((s[0], actionsToNode + [action]))
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
 
     """ Need to check if update needs to be explicitly called"""
     start_state = problem.getStartState()
-    q=util.PriorityQueue()
-    q.push(start_state,-1)
+    q = util.PriorityQueue()
+    q.push((start_state, []), -1)
 
-    explored_list=[]
-    parent_map = {start_state: (-1, -1)}
+    explored_list = []
     while 1:
         if q.isEmpty():
             return []
-        node = q.pop()
+        node, actionsToNode = q.pop()
         if problem.isGoalState(node):
-            actions = []
-            while parent_map[node][1] != -1:
-                actions.append(parent_map[node][1])
-                node = parent_map[node][0]
-            ractions = list(reversed(actions))
-            return ractions
-        explored_list.append(node)
+            return actionsToNode
+        if node in explored_list:
+            continue
+        else:
+            explored_list.append(node)
         for s in problem.getSuccessors(node):
-            if s[0] not in parent_map and s[0] not in explored_list:
-                q.push(s[0],s[2])
-                parent_map[s[0]] = (node, s[1])
+            if s[0] not in explored_list:
+                action = s[1]
+                q.push((s[0], actionsToNode + [action]), s[2])
 
 def nullHeuristic(state, problem=None):
     """
@@ -201,6 +183,30 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     costToNode = node[1] + s[2]
                     q.push((s[0],costToNode), costToNode + heuristic(s[0], problem))
                     parent_map[s[0]] = (nodeState, s[1])
+
+    # start_state = problem.getStartState()
+    # q = util.PriorityQueue()
+    # q.push((start_state, 0, []), 0)
+    #
+    # explored_list = []
+    # while 1:
+    #     if q.isEmpty():
+    #         return []
+    #     node = q.pop()
+    #     nodeState = node[0]
+    #     actionsToNode = node[2]
+    #     if node in explored_list:
+    #         continue
+    #     else:
+    #         explored_list.append(node)
+    #     if problem.isGoalState(nodeState):
+    #         return actionsToNode
+    #
+    #     for s in problem.getSuccessors(nodeState):
+    #         if s[0] not in explored_list:
+    #             costToNode = node[1] + s[2]
+    #             action = s[1]
+    #             q.push((s[0], costToNode, actionsToNode + [action]), costToNode + heuristic(s[0], problem))
 
 
 # Abbreviations
