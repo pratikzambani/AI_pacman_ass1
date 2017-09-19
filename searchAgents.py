@@ -293,6 +293,7 @@ class CornersProblem(search.SearchProblem):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
+        An empty set is returned to keep track of visited corners with state
         """
         return (self.startingPosition, set())
 
@@ -311,6 +312,8 @@ class CornersProblem(search.SearchProblem):
             action, stepCost), where 'successor' is a successor to the current
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
+
+            Everytime a successor is encountered, if it is a corner, append it to the list of visited corners in the state
         """
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
@@ -320,7 +323,7 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
-                if nextState in self.corners and nextState not in state[1]:
+                if nextState in self.corners and nextState not in visitedCorners:
                     visitedCorners = visitedCorners.copy()
                     visitedCorners.add(nextState)
                 successors.append(((nextState,visitedCorners), action, 1))
@@ -343,15 +346,17 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
-def getMinCorner((x,y),goals):
+def getNearestGoal((x,y),goals):
+    """
+    A function that returns the nearest goal in the list of goals passed
+    """
     min = sys.maxint
-    for corner in goals:
-        xy1 = x,y
-        cost= abs(xy1[0] - corner[0]) + abs(xy1[1] - corner[1])
+    for goal in goals:
+        cost= abs(x - goal[0]) + abs(y - goal[1])
         if  cost < min:
             min= cost
-            startCorner = corner
-    return (startCorner,min)
+            nearest_goal = goal
+    return (nearest_goal,min)
 
 def cornersHeuristic(state, problem):
     """
@@ -365,26 +370,27 @@ def cornersHeuristic(state, problem):
     This function should always return a number that is a lower bound on the
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
+
+    The heuristic function first computes manhattan distance to nearest corner from start state
+    Then considers that corner as the start state and adds distance to nearest next corner
+    Continues adding distances in this manner and returns total distance
     """
     corners = problem.corners # These are the corner coordinates
-    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    curr = state[0]
-    visited = state[1]
+    current_state = state[0]
+    visited_corners = state[1]
     goals=[]
     for corner in corners:
-        if corner not in visited:
+        if corner not in visited_corners:
             goals.append(corner)
 
-    totalCost=0;
+    total_cost=0;
     while goals:
-        minCorner,cost= getMinCorner(curr, goals)
-        totalCost = totalCost + cost
-        curr=minCorner
-        print curr
-        goals.remove(minCorner)
-
-    return totalCost
+        nearest_goal,cost= getNearestGoal(current_state, goals)
+        total_cost = total_cost + cost
+        current_state=nearest_goal
+        goals.remove(nearest_goal)
+    return total_cost
 
 
 class AStarCornersAgent(SearchAgent):

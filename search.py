@@ -74,19 +74,13 @@ def tinyMazeSearch(problem):
 
 def depthFirstSearch(problem):
     """
-    Search the deepest nodes in the search tree first.
+    Search the deepest node in the tree first.
+    Algorithm uses Stack data structure to achieve LIFO traversal.
+    During traversal, an explored_list is maintained to keep track of already visited states.
+    Actions to reach any node are also pushed along with state positions onto stack as a tuple
 
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    When goal state is encountered, the actions accumulated with the state is returned
     """
-
     start_state = problem.getStartState()
     stack = util.Stack()
     explored_list = []
@@ -94,17 +88,27 @@ def depthFirstSearch(problem):
     while 1:
         if stack.isEmpty():
             return []
-        node, actionsToNode = stack.pop()
+        node, actions_to_node = stack.pop()
         if problem.isGoalState(node):
-            return actionsToNode
+            return actions_to_node
+        if node in explored_list:
+            continue
         explored_list.append(node)
-        for s in problem.getSuccessors(node):
-            if s[0] not in explored_list:
-                action=s[1]
-                stack.push((s[0],actionsToNode + [action]))
+        for successor in problem.getSuccessors(node):
+            successor_state = successor[0]
+            action_to_successor = successor[1]
+            if successor_state not in explored_list:
+                """ Push successor's state, actions appending action to reach successor from parent node"""
+                stack.push((successor_state, actions_to_node + [action_to_successor]))
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
+    """Search the shallowest nodes in the search tree first.
+       Algorithm uses Queue data structure to achieve FIFO traversal.
+       During traversal, an explored_list is maintained to keep track of already visited states.
+       Actions to reach any node are also pushed along with state positions onto queue as a tuple
+
+       When goal state is encountered, the actions accumulated with the state is returned
+       """
     start_state = problem.getStartState()
     q = util.Queue()
     q.push((start_state, []))
@@ -112,21 +116,28 @@ def breadthFirstSearch(problem):
     while 1:
         if q.isEmpty():
             return []
-        node, actionsToNode = q.pop()
+        node, actions_to_node = q.pop()
         if problem.isGoalState(node):
-            return actionsToNode
+            return actions_to_node
         if node in explored_list:
             continue
         else:
             explored_list.append(node)
-        for s in problem.getSuccessors(node):
-            if s[0] not in explored_list:
-                action = s[1]
-                q.push((s[0], actionsToNode + [action]))
+        for successor in problem.getSuccessors(node):
+            successor_state = successor[0]
+            action_to_successor = successor[1]
+            if successor_state not in explored_list:
+                q.push((successor_state, actions_to_node + [action_to_successor]))
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
+    """Search the node of least total cost first.
+        Algorithm uses Priority Queue data structure to achieve traversal with minimum cost nodes first.
+        During traversal, an explored_list is maintained to keep track of already visited states.
+        With actions and state, cost to reach any node is also pushed along with state positions onto queue as a tuple
+        Priority pushed into queue is the cost to reach that node
 
+        When goal state is encountered, the actions accumulated with the state is returned
+        """
     start_state = problem.getStartState()
     q = util.PriorityQueue()
     q.push((start_state, [], 0), 0)
@@ -135,17 +146,20 @@ def uniformCostSearch(problem):
     while 1:
         if q.isEmpty():
             return []
-        nodeState, actionsToNode, cost = q.pop()
-        if problem.isGoalState(nodeState):
-            return actionsToNode
-        if nodeState in explored_list:
+        node_state, actions_to_node, cost_to_node = q.pop()
+        if problem.isGoalState(node_state):
+            return actions_to_node
+        if node_state in explored_list:
             continue
         else:
-            explored_list.append(nodeState)
-        for s in problem.getSuccessors(nodeState):
-            if s[0] not in explored_list:
-                action = s[1]
-                q.push((s[0], actionsToNode + [action], cost + s[2]), cost + s[2])
+            explored_list.append(node_state)
+        for successor in problem.getSuccessors(node_state):
+            successor_state = successor[0]
+            action_to_successor = successor[1]
+            cost_to_successor = successor[2]
+            if successor_state not in explored_list:
+                q.push((successor[0], actions_to_node + [action_to_successor], cost_to_node + cost_to_successor),
+                       cost_to_node + cost_to_successor)
 
 def nullHeuristic(state, problem=None):
     """
@@ -155,8 +169,14 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
+    """Search the node that has the lowest combined cost and heuristic first.
+        Algorithm uses Priority Queue data structure and heuristic function to achieve traversal with minimum cost nodes first.
+        During traversal, an explored_list is maintained to keep track of already visited states.
+        With actions and state, cost to reach any node is also pushed along with state positions onto queue as a tuple
+        Priority pushed into queue is the cost to reach that node and a heauristic function used to estimate cost to goal
 
+        When goal state is encountered, the actions accumulated with the state is returned
+        """
     start_state = problem.getStartState()
     q = util.PriorityQueue()
     q.push((start_state, 0, []), 0)
@@ -165,18 +185,20 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while 1:
         if q.isEmpty():
             return []
-        nodeState, cost, actionsToNode = q.pop()
-        if nodeState in explored_list:
+        node_state, cost, actions_to_node = q.pop()
+        if node_state in explored_list:
             continue
         else:
-            explored_list.append(nodeState)
-        if problem.isGoalState(nodeState):
-            return actionsToNode
-        for s in problem.getSuccessors(nodeState):
-            if s[0] not in explored_list:
-                costToNode = cost + s[2]
-                action = s[1]
-                q.push((s[0], costToNode, actionsToNode + [action]), costToNode + heuristic(s[0], problem))
+            explored_list.append(node_state)
+        if problem.isGoalState(node_state):
+            return actions_to_node
+        for successor in problem.getSuccessors(node_state):
+            successor_state = successor[0]
+            action_to_successor = successor[1]
+            cost_to_successor = successor[2]
+            if successor_state not in explored_list:
+                cost_from_start = cost + cost_to_successor
+                q.push((successor_state, cost_from_start, actions_to_node + [action_to_successor]), cost_from_start + heuristic(successor_state, problem))
 
 
 # Abbreviations
