@@ -129,13 +129,13 @@ def uniformCostSearch(problem):
 
     start_state = problem.getStartState()
     q = util.PriorityQueue()
-    q.push((start_state, []), 0)
+    q.push((start_state, [], 0), 0)
 
     explored_list = []
     while 1:
         if q.isEmpty():
             return []
-        nodeState, actionsToNode = q.pop()
+        nodeState, actionsToNode, cost = q.pop()
         if problem.isGoalState(nodeState):
             return actionsToNode
         if nodeState in explored_list:
@@ -145,7 +145,7 @@ def uniformCostSearch(problem):
         for s in problem.getSuccessors(nodeState):
             if s[0] not in explored_list:
                 action = s[1]
-                q.push((s[0], actionsToNode + [action]), s[2])
+                q.push((s[0], actionsToNode + [action], cost + s[2]), cost + s[2])
 
 def nullHeuristic(state, problem=None):
     """

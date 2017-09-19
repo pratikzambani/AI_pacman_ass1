@@ -315,17 +315,17 @@ class CornersProblem(search.SearchProblem):
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             x, y = state[0]
-            visitedCorners = state[1]
+            visitedCorners=state[1]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
-                if nextState in self.corners:
+                if nextState in self.corners and nextState not in state[1]:
                     visitedCorners = visitedCorners.copy()
                     visitedCorners.add(nextState)
-                    successors.append(((nextState, visitedCorners), action, 1))
-                else:
-                    successors.append(((nextState, visitedCorners), action, 1))
+                successors.append(((nextState,visitedCorners), action, 1))
+
+
         # Bookkeeping for display purposes
         self._expanded += 1  # DO NOT CHANGE
         return successors
@@ -343,6 +343,15 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+def getMinCorner((x,y),goals):
+    min = sys.maxint
+    for corner in goals:
+        xy1 = x,y
+        cost= abs(xy1[0] - corner[0]) + abs(xy1[1] - corner[1])
+        if  cost < min:
+            min= cost
+            startCorner = corner
+    return (startCorner,min)
 
 def cornersHeuristic(state, problem):
     """
@@ -360,46 +369,23 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    x,y = state[0]
-    visCorners = state[1]
-    goals = []
+    curr = state[0]
+    visited = state[1]
+    goals=[]
     for corner in corners:
-        if corner not in visCorners:
+        if corner not in visited:
             goals.append(corner)
 
-    distances = {}
-    distances[(x,y)] = {}
-    for goal in goals:
-        distances[goal] = {}
+    totalCost=0;
+    while goals:
+        minCorner,cost= getMinCorner(curr, goals)
+        totalCost = totalCost + cost
+        curr=minCorner
+        print curr
+        goals.remove(minCorner)
 
-    startAndGoals = goals + [(x,y)]
+    return totalCost
 
-    for point in startAndGoals:
-        for secondPoint in startAndGoals:
-            if point != secondPoint:
-                xy1 = point
-                xy2 = secondPoint
-                dist = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-                distances[point][secondPoint] = dist
-
-    path = [(x,y)]
-    cost = 0
-    while len(path) != len(startAndGoals):
-        nearestPointDist = sys.maxint
-        nearestPoint = -1
-        startPoint = path[-1]
-        for point, dist in distances[startPoint].iteritems():
-            if dist < nearestPointDist:
-                nearestPointDist = dist
-                nearestPoint = point
-
-        path.append(nearestPoint)
-        cost += nearestPointDist
-
-    # print 'path for heuristic is ', path
-    # print 'heuristic returned ', cost
-    return cost # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -463,6 +449,8 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -492,8 +480,21 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    # print foodGrid.asList()
+    # These are the corner coordinates
+    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+
+    curr = position
+    goals = foodGrid.asList()
+    totalCost=0;
+    while goals:
+        minCorner,cost= getMinCorner(curr, goals)
+        walls = getWalls(curr, minCorner, walls)
+        totalCost = totalCost + cost + walls
+        curr=minCorner
+        goals.remove(minCorner)
+
+    return totalCost
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -525,6 +526,8 @@ class ClosestDotSearchAgent(SearchAgent):
 
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
+
+
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
