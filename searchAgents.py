@@ -486,21 +486,44 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    # print foodGrid.asList()
-    # These are the corner coordinates
-    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    "*** YOUR CODE HERE ***"
+    rows = foodGrid.width
+    cols = foodGrid.height
 
-    curr = position
+    # print "position is ", position
     goals = foodGrid.asList()
-    totalCost=0;
-    while goals:
-        minCorner,cost= getMinCorner(curr, goals)
-        walls = getWalls(curr, minCorner, walls)
-        totalCost = totalCost + cost + walls
-        curr=minCorner
-        goals.remove(minCorner)
+    # print "goals are ", goals
+    mindist = sys.maxint
+    newposi = -1
+    newposj = -1
 
-    return totalCost
+    for goal in goals:
+        # print "checking mindist for goal ", goal
+        xy1 = position
+        xy2 = goal
+        dist = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        if dist < mindist:
+            newposi = goal[0]
+            newposj = goal[1]
+            mindist = dist
+
+    if mindist == sys.maxint:
+        mindist = 0
+    # print "mindist is ", mindist
+
+    maxdist = 0
+    for goal in goals:
+        # print "checking maxdist for goal ", goal
+        xy1 = (newposi, newposj)
+        xy2 = (goal)
+        dist = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        if dist > maxdist:
+            maxdist = dist
+
+    # print "maxdist is ", maxdist
+    val = mindist + maxdist
+    # print "heuritic returned : ", val
+    return val
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
