@@ -82,15 +82,19 @@ def depthFirstSearch(problem):
     When goal state is encountered, the actions accumulated with the state is returned
     """
     start_state = problem.getStartState()
+    """Using stack to achieve LIFO traversal"""
     stack = util.Stack()
     explored_list = []
+    """Pushing start state and an empty list of actions initially"""
     stack.push((start_state,[]))
     while 1:
         if stack.isEmpty():
             return []
+        # Pop the state position and the list of actions to that state
         node, actions_to_node = stack.pop()
         if problem.isGoalState(node):
             return actions_to_node
+        # If node is already explored, no action, continue to the next element to be popped
         if node in explored_list:
             continue
         explored_list.append(node)
@@ -98,7 +102,7 @@ def depthFirstSearch(problem):
             successor_state = successor[0]
             action_to_successor = successor[1]
             if successor_state not in explored_list:
-                """ Push successor's state, actions appending action to reach successor from parent node"""
+                 # Append acton to reach successor to the list of actions to reach parent and push(state, actions)
                 stack.push((successor_state, actions_to_node + [action_to_successor]))
 
 def breadthFirstSearch(problem):
@@ -110,15 +114,19 @@ def breadthFirstSearch(problem):
        When goal state is encountered, the actions accumulated with the state is returned
        """
     start_state = problem.getStartState()
+    # Using queue to achieve FIFO traversal
     q = util.Queue()
+    # Pushing start state and an empty list of actions initially
     q.push((start_state, []))
     explored_list = []
     while 1:
         if q.isEmpty():
             return []
+        # Pop the state position and the list of actions to that state
         node, actions_to_node = q.pop()
         if problem.isGoalState(node):
             return actions_to_node
+        # If node is already explored, no action, continue to the next element to be popped
         if node in explored_list:
             continue
         else:
@@ -127,6 +135,7 @@ def breadthFirstSearch(problem):
             successor_state = successor[0]
             action_to_successor = successor[1]
             if successor_state not in explored_list:
+                # Append acton to reach successor to the list of actions to reach parent and push(state, actions)
                 q.push((successor_state, actions_to_node + [action_to_successor]))
 
 def uniformCostSearch(problem):
@@ -139,16 +148,20 @@ def uniformCostSearch(problem):
         When goal state is encountered, the actions accumulated with the state is returned
         """
     start_state = problem.getStartState()
+    # Using Priority queue to achieve highest priority node(least cost node) traversal
     q = util.PriorityQueue()
+    # Pushing start state and an empty list of actions, 0 cost, and 0 as priority initially
     q.push((start_state, [], 0), 0)
 
     explored_list = []
     while 1:
         if q.isEmpty():
             return []
+        # Pop the state position, list of actions to that state and cost to reach that node
         node_state, actions_to_node, cost_to_node = q.pop()
         if problem.isGoalState(node_state):
             return actions_to_node
+        # If node is already explored, no action, continue to the next element to be popped
         if node_state in explored_list:
             continue
         else:
@@ -158,7 +171,10 @@ def uniformCostSearch(problem):
             action_to_successor = successor[1]
             cost_to_successor = successor[2]
             if successor_state not in explored_list:
-                q.push((successor[0], actions_to_node + [action_to_successor], cost_to_node + cost_to_successor),
+                # Append acton to reach successor to the list of actions to reach parent
+                # Add cost to successor to the cost to reach parent
+                # push (state, actions, total cost) on queue with Priority as total cost
+                q.push((successor_state, actions_to_node + [action_to_successor], cost_to_node + cost_to_successor),
                        cost_to_node + cost_to_successor)
 
 def nullHeuristic(state, problem=None):
@@ -178,14 +194,18 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         When goal state is encountered, the actions accumulated with the state is returned
         """
     start_state = problem.getStartState()
+    # Using Priority queue to achieve highest priority node(least cost node) traversal
     q = util.PriorityQueue()
-    q.push((start_state, 0, []), 0)
+    # Pushing start state and an empty list of actions, 0 cost, and 0 as priority initially
+    q.push((start_state,[], 0 ), 0)
 
     explored_list = []
     while 1:
         if q.isEmpty():
             return []
-        node_state, cost, actions_to_node = q.pop()
+        # Pop the state position, list of actions to that state and cost to reach that node
+        node_state, actions_to_node, cost_to_node = q.pop()
+        # If node is already explored, no action, continue to the next element to be popped
         if node_state in explored_list:
             continue
         else:
@@ -197,8 +217,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             action_to_successor = successor[1]
             cost_to_successor = successor[2]
             if successor_state not in explored_list:
-                cost_from_start = cost + cost_to_successor
-                q.push((successor_state, cost_from_start, actions_to_node + [action_to_successor]), cost_from_start + heuristic(successor_state, problem))
+                # Append acton to reach successor to the list of actions to reach parent
+                # Add cost to successor to the cost to reach parent
+                # push (state,action, total_cost) on queue with Priority as total cost + heuristic estimate from state to goal
+                cost_from_start = cost_to_node + cost_to_successor
+                q.push((successor_state, actions_to_node + [action_to_successor], cost_from_start), cost_from_start + heuristic(successor_state, problem))
 
 
 # Abbreviations

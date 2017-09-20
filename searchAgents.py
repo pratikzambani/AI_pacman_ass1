@@ -292,15 +292,16 @@ class CornersProblem(search.SearchProblem):
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
-        space)
-        An empty set is returned to keep track of visited corners with state
-        """
+        space)"""
+
+        # An empty set is returned to keep track of visited corners with state
         return (self.startingPosition, set())
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
+        #if all corners exist in the set of visited corners in the state
         return set(self.corners) == set(state[1])
 
     def getSuccessors(self, state):
@@ -323,6 +324,8 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
+                #if state is a corner and is not already visited add to the set of visited corners in state and then return successor
+                #if state is not a corner, return the same set of visited corners as it was before
                 if nextState in self.corners and nextState not in visitedCorners:
                     visitedCorners = visitedCorners.copy()
                     visitedCorners.add(nextState)
@@ -350,13 +353,13 @@ def getNearestGoal((x,y),goals):
     """
     A function that returns the nearest goal in the list of goals passed
     """
-    min = sys.maxint
+    minDistance = sys.maxint
     for goal in goals:
-        cost= abs(x - goal[0]) + abs(y - goal[1])
-        if  cost < min:
-            min= cost
+        distance= abs(x - goal[0]) + abs(y - goal[1])
+        if  distance < minDistance:
+            minDistance= distance
             nearest_goal = goal
-    return (nearest_goal,min)
+    return (nearest_goal, minDistance)
 
 def cornersHeuristic(state, problem):
     """
@@ -376,21 +379,24 @@ def cornersHeuristic(state, problem):
     Continues adding distances in this manner and returns total distance
     """
     corners = problem.corners # These are the corner coordinates
-
     current_state = state[0]
     visited_corners = state[1]
     goals=[]
+    #Add only those corners that are yet to be visited in the goal
     for corner in corners:
         if corner not in visited_corners:
             goals.append(corner)
 
-    total_cost=0;
+    total_distance=0;
     while goals:
-        nearest_goal,cost= getNearestGoal(current_state, goals)
-        total_cost = total_cost + cost
+        #get the nearest goal and distance to it, add to total distance to be travelled
+        nearest_goal,distance= getNearestGoal(current_state, goals)
+        total_distance = total_distance + distance
+        #consider the goal as the next state
         current_state=nearest_goal
+        #remove state from goal as it has been accounted for
         goals.remove(nearest_goal)
-    return total_cost
+    return total_distance
 
 
 class AStarCornersAgent(SearchAgent):
