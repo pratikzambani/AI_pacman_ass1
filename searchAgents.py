@@ -496,15 +496,14 @@ def foodHeuristic(state, problem):
     rows = foodGrid.width
     cols = foodGrid.height
 
-    # print "position is ", position
     goals = foodGrid.asList()
-    # print "goals are ", goals
+
     mindist = sys.maxint
     newposi = -1
     newposj = -1
 
+    """ Calculating manhattan distance to all goals and taking maximum """
     for goal in goals:
-        # print "checking mindist for goal ", goal
         xy1 = position
         xy2 = goal
         dist = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
@@ -515,21 +514,17 @@ def foodHeuristic(state, problem):
 
     if mindist == sys.maxint:
         mindist = 0
-    # print "mindist is ", mindist
 
+    """ From farthest goal from above, calculating minimum distance to other goals """
     maxdist = 0
     for goal in goals:
-        # print "checking maxdist for goal ", goal
         xy1 = (newposi, newposj)
         xy2 = (goal)
         dist = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
         if dist > maxdist:
             maxdist = dist
 
-    # print "maxdist is ", maxdist
-    val = mindist + maxdist
-    # print "heuritic returned : ", val
-    return val
+    return mindist + maxdist
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
